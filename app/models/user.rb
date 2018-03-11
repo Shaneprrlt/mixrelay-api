@@ -29,13 +29,25 @@ class User < ApplicationRecord
   validates :last_name, presence: true, if: lambda { self.status.to_sym != :onboarding }
   validates :phone_verified, inclusion: { in: [true] }, if: lambda { self.status.to_sym != :onboarding }
 
-  before_create :set_initial_status, :generate_token
+  before_validation :format_phone_number
+  before_validation :set_initial_status, on: :create
+
+  before_create :generate_token
 
   enum status: {
     onboarding: 100,
     complete: 200,
     deactivated: 300
   }
+
+  def full_name
+    "#{self.first_name} #{self.last_name}"
+  end
+
+  def format_phone_number
+    phone = Phonelib.parse(self.phone_number)
+    self.phone_number = phone.full_e164
+  end
 
   def set_initial_status
     self.status = :onboarding
