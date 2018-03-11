@@ -10,6 +10,8 @@ Rails.application.routes.draw do
 
     # resources :groups, only: [:index, :create, :show, :update, :destroy]
 
+    post 'onboarding/check_username', to: 'onboarding#check_username'
+
     post 'phone_verification/send_verification_code', to: 'phone_verification#send_verification_code'
     post 'phone_verification/verify_code', to: 'phone_verification#verify_code'
 
