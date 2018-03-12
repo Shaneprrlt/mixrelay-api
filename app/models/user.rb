@@ -29,10 +29,11 @@ class User < ApplicationRecord
   validates :last_name, presence: true, if: lambda { self.status.to_sym != :onboarding }
   validates :phone_verified, inclusion: { in: [true] }, if: lambda { self.status.to_sym != :onboarding }
 
-  before_validation :format_phone_number
+  before_validation :format_phone_number, :downcase_email
   before_validation :set_initial_status, on: :create
 
   before_create :generate_token
+  after_create_commit :slackify
 
   enum status: {
     onboarding: 100,
@@ -49,8 +50,12 @@ class User < ApplicationRecord
     self.phone_number = phone.full_e164
   end
 
+  def downcase_email
+    self.email = self.email.downcase
+  end
+
   def set_initial_status
-    self.status = :onboarding
+    self.status = :complete
   end
 
   def generate_token
@@ -66,5 +71,13 @@ class User < ApplicationRecord
     if self.status.to_sym == :deactivated
       self.update(status: :complete)
     end
+  end
+
+  def slackify
+    message = "New User"
+    message += "\nUsername: #{self.username}"
+    message += "\nEmail: #{self.email}"
+    message += "\nCreated: #{self.created_at}"
+    SendSlackMessageJob.perform_later(ENV['SLACK_SIGNUPS_CHANNEL'], message)
   end
 end
