@@ -44,7 +44,9 @@ Rails.application.configure do
   # Use an evented file watcher to asynchronously detect changes in source code,
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
-
+  
+  # DEV KEYS DISABLED FOR MAKING REPO PUBLIC
+  
   ENV['TWILIO_ACCOUNT_SID'] = 'AC82ba5a90181f5dabfb23dc6a63285745'
   ENV['TWILIO_AUTH_TOKEN'] = 'cee63b631a8d2c2b279848340972b186'
 
